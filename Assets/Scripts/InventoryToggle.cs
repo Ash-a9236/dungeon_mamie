@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class InventoryToggle : MonoBehaviour
 {
-    // Drag your InventoryMenu (the whole UI) here in Inspector
     public GameObject inventoryUI;
 
     private bool isOpen = false;
@@ -27,7 +26,7 @@ public class InventoryToggle : MonoBehaviour
         isOpen = !isOpen;
         inventoryUI.SetActive(isOpen);
 
-        // Optional: lock/unlock cursor
+        //lock/unlock cursor
         if (isOpen)
         {
             Cursor.lockState = CursorLockMode.None;
