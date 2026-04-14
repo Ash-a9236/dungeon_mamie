@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -188,11 +187,28 @@ public class ObjectPoolManager : MonoBehaviour
     }
 
     // for component
+    /// <summary>
+    /// Spawn, or enable, an instance of an prefab already pooled in one of the pools available
+    /// </summary>
+    /// <typeparam name="T">Class type of the object to be spawned/enabled</typeparam>
+    /// <param name="typePrefab">Prefab to be spawned</param>
+    /// <param name="spawnPos">The position of the object</param>
+    /// <param name="spawnRot">The rotation of the object</param>
+    /// <param name="poolType">GameObjects, ParticleSystems or SoundFX</param>
+    /// <returns>Returns a reference to the object spawned</returns>
     public static T SpawnObject<T>(T typePrefab, Vector3 spawnPos, Quaternion spawnRot, PoolType poolType = PoolType.GameObjects) where T : Component
     {
         return SpawnObject<T>(typePrefab.gameObject, spawnPos, spawnRot, poolType);
     }
 
+    /// <summary>
+    /// Spawn, or enable, an instance of an prefab already pooled in one of the pools available
+    /// </summary>
+    /// <param name="typePrefab">Prefab to be spawned</param>
+    /// <param name="spawnPos">The position of the object</param>
+    /// <param name="spawnRot">The rotation of the object</param>
+    /// <param name="poolType">GameObjects, ParticleSystems or SoundFX</param>
+    /// <returns>Returns a reference to the object spawned</returns>
     public static GameObject SpawnObject(GameObject objectToSpawn, Vector3 spawnPos, Quaternion spawnRot, PoolType poolType = PoolType.GameObjects)
     {
         return SpawnObject<GameObject>(objectToSpawn, spawnPos, spawnRot, poolType);
@@ -241,17 +257,39 @@ public class ObjectPoolManager : MonoBehaviour
 
         return null;
     }
-
+    
+    /// <summary>
+    /// Spawn, or enable, an instance of an prefab already pooled in one of the pools available
+    /// </summary>
+    /// <typeparam name="T">Class type of the object to be spawned/enabled</typeparam>
+    /// <param name="typePrefab">Prefab to be spawned</param>
+    /// <param name="spawnPos">The position of the object</param>
+    /// <param name="spawnRot">The rotation of the object</param>
+    /// <param name="poolType">GameObjects, ParticleSystems or SoundFX</param>
+    /// <returns>Returns a reference to the object spawned</returns>
     public static T SpawnObject<T>(T typePrefab, Transform parent, Quaternion spawnRot, PoolType poolType = PoolType.GameObjects) where T : Component
     {
         return SpawnObject<T>(typePrefab.gameObject, parent, spawnRot, poolType);
     }
 
+    /// <summary>
+    /// Spawn, or enable, an instance of an prefab already pooled in one of the pools available
+    /// </summary>
+    /// <param name="typePrefab">Prefab to be spawned</param>
+    /// <param name="spawnPos">The position of the object</param>
+    /// <param name="spawnRot">The rotation of the object</param>
+    /// <param name="poolType">GameObjects, ParticleSystems or SoundFX</param>
+    /// <returns>Returns a reference to the object spawned</returns>
     public static GameObject SpawnObject(GameObject objectToSpawn, Transform parent, Quaternion spawnRot, PoolType poolType = PoolType.GameObjects)
     {
         return SpawnObject<GameObject>(objectToSpawn, parent, spawnRot, poolType);
     }
 
+    /// <summary>
+    /// Disable an object in an object pool
+    /// </summary>
+    /// <param name="obj">object to be disabled</param>
+    /// <param name="poolType">pool where the object will be assigned</param>
     public static void ReturnObjectToPool(GameObject obj, PoolType poolType = PoolType.GameObjects)
     {
         string text = string.Join(", ",_cloneToPrefabMap.Select(v=>v.ToString()));
