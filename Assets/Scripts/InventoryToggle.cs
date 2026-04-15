@@ -14,8 +14,8 @@ public class InventoryToggle : MonoBehaviour
 
     void Update()
     {
-        // When ESC is pressed
-        if (Input.GetKeyDown(KeyCode.Escape))
+        // When I is pressed
+        if (Input.GetKeyDown(KeyCode.I))
         {
             ToggleInventory();
         }
