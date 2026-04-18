@@ -11,7 +11,7 @@ public class CameraFollow : MonoBehaviour
 
     [Header("3D Mode")]
     public Vector3 offset3D = new Vector3(0, 10, -10);
-    public float tiltAngle = 45f;
+    public float tiltAngle = 90f;
     public float smoothTime = 0.1f;
 
     private Vector3 velocity = Vector3.zero;
@@ -39,5 +39,6 @@ public class CameraFollow : MonoBehaviour
             rotation = Quaternion.Euler(tiltAngle, rotation.eulerAngles.y, 0f);
             transform.rotation = rotation;
         }
+        is3DMode = true;
     }
 }
