@@ -2,7 +2,7 @@
 ![Build](https://img.shields.io/badge/build-passing-brightgreen)
 ![Version](https://img.shields.io/badge/version-0.0.1-orange)
 [![GitHub Issues](https://img.shields.io/github/issues/Ash-a9236/dungeon_mamie.svg)](https://github.com/Ash-a9236/dungeon_mamie/issues)
-![License](https://img.shields.io/badge/license-MIT-blue)
+![License](https://img.shields.io/badge/license-All_Rights_Reserved-red)
 
 <!-- TODO: write readme -->
 ## Credits
