@@ -3,32 +3,32 @@
 <!-- TODO: write readme -->
 ## Credits
 ### Programming
-Sabrina
-Jonas
-Meerab
-Helene
-Cheng Yu
+- Sabrina
+- Jonas
+- Meerab
+- Helene
+- Cheng Yu
 
 ### Art
-Sabrina
-Meerab
-Cheng Yu
+- Sabrina
+- Meerab
+- Cheng Yu
 
 ### Music
-Cheng Yu
+- Cheng Yu
 
 ### Level Design
-Sabrina
-Jonas
+- Sabrina
+- Jonas
 
 ### UI Design
-Meerab
-Helene
+- Meerab
+- Helene
 
 ### Technical Direction
-Sabrina
-Jonas
-Cheng Yu
+- Sabrina
+- Jonas
+- Cheng Yu
 
 ### Story Direction
-Sabrina
+- Sabrina
