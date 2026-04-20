@@ -1,5 +1,5 @@
 # Dungeon Mamie
-![GitHub Issues](https://img.shields.io/github/issues/Ash-a9236/dungeon_mamie.svg)
+[![GitHub Issues](https://img.shields.io/github/issues/Ash-a9236/dungeon_mamie.svg)](https://github.com/Ash-a9236/dungeon_mamie/issues)
 
 <!-- TODO: write readme -->
 ## Credits
