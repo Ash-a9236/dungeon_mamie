@@ -2,30 +2,31 @@
 
 <!-- TODO: write readme -->
 ## Credits
-### Programming
+### Programming(gameplay programmer and AI programmer)
 - Sabrina
 - Jonas
 - Meerab
 - Helene
 - Cheng Yu
 
-### Art
+### Art (sprites & animation)
 - Sabrina
 - Meerab
 - Cheng Yu
+- Jonas
 
-### Music
+### Music (audio/effects programmer)
 - Cheng Yu
 
-### Level Design
+### Level Design (level designer)
 - Sabrina
 - Jonas
 
-### UI Design
+### UI Design (UI programmer)
 - Meerab
 - Helene
 
-### Technical Direction
+### Technical Direction (technical designer)
 - Sabrina
 - Jonas
 - Cheng Yu
