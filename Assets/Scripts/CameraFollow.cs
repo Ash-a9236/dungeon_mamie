@@ -1,86 +1,202 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
 {
     [Header("Target")]
     public Transform target;
-    public CharacterMovement playerMovement;
 
-    [Header("Mode Override (Zones)")]
-    public bool overrideMode = false;
-    public Mode forcedMode = Mode.Mode3D;
+    [Header("Optional Player Sync")]
+    public CharacterMovement player;
 
-    public enum Mode
-    {
-        Mode2D,
-        Mode3D
-    }
+    [Header("Camera Distance")]
+    public float distance = 4f;
+    public float height = 4f;
 
-    [Header("2D Settings")]
-    public Vector3 offset2D = new Vector3(0, 0, -10f);
-    public float orthoSize2D = 5f;
-    public float smooth2D = 0.1f;
+    [Header("Camera Angle")]
+    [Range(10f, 60f)]
+    public float baseAngle = 30f;
 
-    [Header("3D Settings")]
-    public Vector3 offset3D = new Vector3(0, 6f, -8f);
-    public float rotationX3D = 20f;
-    public float smooth3D = 0.12f;
-    public float rotationSmooth = 8f;
+    [Header("Smoothness")]
+    public float moveSmooth = 8f;
+    public float rotationSmooth = 12f;
 
-    [Header("Zoom Settings")]
+    [Header("View Rotation")]
+    public float currentAngle = 0f;
+    public float targetAngle = 0f;
+    public float rotateAmount = 90f;
+    public float fineRotateAmount = 9f;
+
+    [Header("View Mode")]
+    public bool faceFront = false;
+
+    [Header("Zoom")]
     public float minFov = 40f;
     public float maxFov = 80f;
-
-    public float minOrtho = 3f;
-    public float maxOrtho = 8f;
-
     public float zoomSpeed = 10f;
     public float zoomLerpSpeed = 6f;
 
-    private Vector3 velocity;
-
+    private Vector3 currentVelocity;
     private float targetFov;
-    private float targetOrtho;
 
     private bool controllerConnected;
 
     void Start()
     {
-        targetFov = Camera.main.fieldOfView;
-        targetOrtho = Camera.main.orthographicSize;
+        if (Camera.main)
+            targetFov = Camera.main.fieldOfView;
 
         CheckController();
     }
 
     void Update()
     {
-        CheckController();
+        HandleViewToggle();
+        HandleRotationInput();
         HandleZoomInput();
+        CheckController();
     }
 
     void LateUpdate()
     {
-        if (target == null) return;
+        if (!target)
+            return;
 
-        Mode mode = GetMode();
-
-        if (mode == Mode.Mode2D)
-            Handle2D();
-        else
-            Handle3D();
+        UpdateCameraPosition();
     }
 
-    Mode GetMode()
+    void HandleViewToggle()
     {
-        if (overrideMode)
-            return forcedMode;
+        if (Input.GetKeyDown(KeyCode.F5))
+        {
+            faceFront = !faceFront;
+        }
+    }
 
-        if (playerMovement == null)
-            return Mode.Mode3D;
+    void HandleRotationInput()
+    {
+        bool fineMode = Input.GetKey(KeyCode.RightShift);
 
-        return playerMovement.currentMode == CharacterMovement.MovementMode.ThreeD
-            ? Mode.Mode3D
-            : Mode.Mode2D;
+        float step = fineMode ? fineRotateAmount : rotateAmount;
+
+        if (!fineMode)
+        {
+            if (Input.GetKeyDown(KeyCode.P))
+                targetAngle += rotateAmount;
+
+            if (Input.GetKeyDown(KeyCode.I))
+                targetAngle -= rotateAmount;
+
+            currentAngle = targetAngle;
+        }
+        else
+        {
+            if (Input.GetKey(KeyCode.P))
+                targetAngle += step * Time.deltaTime * 10f;
+
+            if (Input.GetKey(KeyCode.I))
+                targetAngle -= step * Time.deltaTime * 10f;
+
+            currentAngle = Mathf.LerpAngle(
+                currentAngle,
+                targetAngle,
+                Time.deltaTime * 6f
+            );
+        }
+    }
+
+    void UpdateCameraPosition()
+    {
+        float directionMultiplier = faceFront ? 1f : -1f;
+
+        Quaternion rotation =
+            Quaternion.Euler(baseAngle, currentAngle, 0f);
+
+        Vector3 forward =
+            rotation * Vector3.forward * directionMultiplier;
+
+        forward.y = 0f;
+        forward.Normalize();
+
+        Vector3 desiredPosition =
+            target.position
+            - forward * distance
+            + Vector3.up * height;
+
+        transform.position = Vector3.SmoothDamp(
+            transform.position,
+            desiredPosition,
+            ref currentVelocity,
+            1f / moveSmooth
+        );
+
+        Quaternion lookRotation =
+            Quaternion.LookRotation(
+                target.position - transform.position
+            );
+
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            lookRotation,
+            Time.deltaTime * rotationSmooth
+        );
+
+        if (player && !faceFront)
+        {
+            Vector3 flatForward = forward;
+            flatForward.y = 0f;
+
+            if (flatForward.sqrMagnitude > 0.001f)
+            {
+                Quaternion targetRot =
+                    Quaternion.LookRotation(flatForward);
+
+                player.transform.rotation =
+                    Quaternion.Slerp(
+                        player.transform.rotation,
+                        targetRot,
+                        Time.deltaTime * 12f
+                    );
+            }
+        }
+
+        if (Camera.main)
+        {
+            Camera.main.fieldOfView = Mathf.Lerp(
+                Camera.main.fieldOfView,
+                targetFov,
+                Time.deltaTime * zoomLerpSpeed
+            );
+        }
+    }
+
+    void HandleZoomInput()
+    {
+        float zoomInput = 0f;
+
+        if (controllerConnected)
+        {
+            float stick = Input.GetAxis("RightStickVertical");
+            float triggers = Input.GetAxis("LT") - Input.GetAxis("RT");
+
+            zoomInput = Mathf.Abs(stick) > 0.1f
+                ? stick
+                : triggers;
+        }
+        else
+        {
+            zoomInput = Input.GetAxis("Mouse ScrollWheel");
+        }
+
+        if (Mathf.Abs(zoomInput) > 0.01f)
+        {
+            targetFov -= zoomInput * zoomSpeed;
+        }
+
+        targetFov = Mathf.Clamp(
+            targetFov,
+            minFov,
+            maxFov
+        );
     }
 
     void CheckController()
@@ -97,92 +213,5 @@ public class CameraFollow : MonoBehaviour
                 break;
             }
         }
-    }
-
-    void HandleZoomInput()
-    {
-        float zoomInput = 0f;
-
-        if (controllerConnected)
-        {
-            float stick = Input.GetAxis("RightStickVertical");
-            float triggers = Input.GetAxis("LT") - Input.GetAxis("RT");
-
-            zoomInput = Mathf.Abs(stick) > 0.1f ? stick : triggers;
-        }
-        else
-        {
-            zoomInput = Input.GetAxis("Mouse ScrollWheel");
-        }
-
-        if (Mathf.Abs(zoomInput) > 0.01f)
-        {
-            targetFov -= zoomInput * zoomSpeed;
-            targetOrtho -= zoomInput * (zoomSpeed * 0.1f);
-        }
-
-        targetFov = Mathf.Clamp(targetFov, minFov, maxFov);
-        targetOrtho = Mathf.Clamp(targetOrtho, minOrtho, maxOrtho);
-    }
-
-    void Handle2D()
-    {
-        Vector3 desiredPos = new Vector3(
-            target.position.x + offset2D.x,
-            target.position.y + offset2D.y,
-            offset2D.z
-        );
-
-        transform.position = Vector3.SmoothDamp(
-            transform.position,
-            desiredPos,
-            ref velocity,
-            smooth2D
-        );
-
-        transform.rotation = Quaternion.identity;
-
-        Camera.main.orthographic = true;
-
-        Camera.main.orthographicSize = Mathf.Lerp(
-            Camera.main.orthographicSize,
-            targetOrtho,
-            Time.deltaTime * zoomLerpSpeed
-        );
-    }
-
-    void Handle3D()
-    {
-        Vector3 desiredPos = target.position + offset3D;
-
-        transform.position = Vector3.SmoothDamp(
-            transform.position,
-            desiredPos,
-            ref velocity,
-            smooth3D
-        );
-
-        Vector3 lookDir = target.position - transform.position;
-        Quaternion lookRot = Quaternion.LookRotation(lookDir);
-
-        Quaternion finalRot = Quaternion.Euler(
-            rotationX3D,
-            lookRot.eulerAngles.y,
-            0f
-        );
-
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation,
-            finalRot,
-            Time.deltaTime * rotationSmooth
-        );
-
-        Camera.main.orthographic = false;
-
-        Camera.main.fieldOfView = Mathf.Lerp(
-            Camera.main.fieldOfView,
-            targetFov,
-            Time.deltaTime * zoomLerpSpeed
-        );
     }
 }
