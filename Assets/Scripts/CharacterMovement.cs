@@ -1,252 +1,504 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 [RequireComponent(typeof(Rigidbody))]
-
 public class CharacterMovement : MonoBehaviour
 {
-    [Header("Movement Settings")]
-    [SerializeField] private float walkSpeed = 2.5f;
-    [SerializeField] private float runSpeed = 5f;
-    [SerializeField] private float rotationSpeed = 12f;
-    [SerializeField] private float airControlPercent = 0.6f;
+    [Header("Movement")]
+    [SerializeField] private float walkSpeed = 12f;
+    [SerializeField] private float sprintSpeed = 15f;
+    [SerializeField] private float acceleration = 3f;
+    [SerializeField] private float airControl = 0.65f;
+    [SerializeField] private float rotationSpeed = 14f;
 
-    [Header("Jump Settings")]
-    [SerializeField] private float gravity = -9.87f;
-    [SerializeField] private float fallMultiplier = 2.2f;
-    [SerializeField] private float lowJumpMultiplier = 2f;
-    [SerializeField] private float jumpHeightMin = 0.5f;
-    [SerializeField] private float jumpHeightMax = 2f;
-    [SerializeField] private float maxChargeTime = 0.2f;
-    [SerializeField] private float doubleJumpBoost = 3f;
-    [SerializeField] private float groundCheckDistance = 1.5f;
+    [Header("Jump")]
+    [SerializeField] private float jumpForce = 9f;
+    [SerializeField] private float chargedJumpForce = 14f;
+    [SerializeField] private float doubleJumpForce = 10f;
 
-    [SerializeField] private float doubleJumpCooldown = 30f;
-    private float energyTimer;
-    private bool doubleJumpAvailable = true;
+    [Header("Charge Jump")]
+    [SerializeField] private float maxChargeTime = 0.5f;
 
+    [Header("Gravity")]
+    [SerializeField] private float gravityMultiplier = 2f;
+    [SerializeField] private float fallMultiplier = 3f;
+
+    [Header("Dash")]
+    [SerializeField] private float dashForce = 18f;
+    [SerializeField] private float dashDuration = 0.2f;
+    [SerializeField] private float dashCooldown = 0.5f;
+
+    [Header("Ground Check")]
+    [SerializeField] private float groundDistance = 0.8f;
+    [SerializeField] private LayerMask groundMask;
+
+    [Header("Animation")]
+    public Animator animator;
+
+    [Header("UI")]
     public Image chargeBarFill;
 
     private Rigidbody rb;
-    private Transform cameraTransform;
-    private float moveX;
-    private float moveZ;
+    private Transform cam;
+
     private Vector3 moveDirection;
+
+    private bool isGrounded;
+    private bool canDoubleJump;
+
     private bool isCharging;
     private float chargeTimer;
-    private int jumpCount;
-    private bool wasGroundedLastFrame;
 
-    public enum MovementMode { TwoD, ThreeD }
-    public MovementMode currentMode = MovementMode.TwoD;
+    private bool isDashing;
+    private bool canDash = true;
 
-    public bool IsGrounded => Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, groundCheckDistance);
-    private bool IsRunning => Input.GetKey(KeyCode.LeftShift) && moveDirection.magnitude > 0.1f;
+    private bool isBlocking;
 
-    private void Awake()
+    private float moveX;
+    private float moveZ;
+
+    void Awake()
     {
         rb = GetComponent<Rigidbody>();
+
         rb.freezeRotation = true;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
+        rb.collisionDetectionMode =
+            CollisionDetectionMode.Continuous;
 
         if (Camera.main)
-            cameraTransform = Camera.main.transform;
+        {
+            cam = Camera.main.transform;
+        }
     }
 
-    private void Update()
+    void Update()
     {
-        moveX = Input.GetAxisRaw("Horizontal");
-        moveZ = Input.GetAxisRaw("Vertical");
+        CheckGround();
 
-        HandleModeToggle();
+        HandleInput();
+
         HandleJumpInput();
+
+        HandleDashInput();
+
+        HandleBlockInput();
+
+        UpdateAnimations();
+
         UpdateChargeUI();
-        UpdateDoubleJumpEnergy();
     }
 
-    private void FixedUpdate()
+    void FixedUpdate()
     {
         ApplyBetterGravity();
-        HandleMovement();
-    }
 
-    private void HandleModeToggle()
-    {
-        if (Input.GetKeyDown(KeyCode.P))
+        if (!isDashing && !isBlocking)
         {
-            currentMode = currentMode == MovementMode.TwoD ? MovementMode.ThreeD : MovementMode.TwoD;
+            HandleMovement();
         }
     }
 
-    private void HandleJumpInput()
+    void HandleInput()
     {
-        bool grounded = IsGrounded;
+        moveX = 0f;
+        moveZ = 0f;
 
-        if (grounded && !wasGroundedLastFrame)
-            jumpCount = 0;
+        if (Input.GetKey(KeyCode.W))
+            moveZ += 1f;
 
-        if (grounded && jumpCount == 0 && (Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.UpArrow)))
+        if (Input.GetKey(KeyCode.S))
+            moveZ -= 1f;
+
+        if (Input.GetKey(KeyCode.A))
+            moveX -= 1f;
+
+        if (Input.GetKey(KeyCode.D))
+            moveX += 1f;
+
+        if (!cam && Camera.main)
         {
-            isCharging = true;
-            chargeTimer = 0f;
+            cam = Camera.main.transform;
         }
 
-        if (isCharging)
+        if (!cam)
         {
-            if (!grounded)
+            moveDirection =
+                new Vector3(moveX, 0, moveZ).normalized;
+
+            return;
+        }
+
+        Vector3 forward = cam.forward;
+        Vector3 right = cam.right;
+
+        forward.y = 0;
+        right.y = 0;
+
+        forward.Normalize();
+        right.Normalize();
+
+        moveDirection =
+            (forward * moveZ + right * moveX).normalized;
+    }
+
+    void HandleMovement()
+    {
+        float speed = walkSpeed;
+
+        if (
+            Input.GetKey(KeyCode.LeftShift) &&
+            moveDirection.sqrMagnitude > 0.01f
+        )
+        {
+            speed = sprintSpeed;
+        }
+
+        Vector3 targetVelocity =
+            moveDirection * speed;
+
+        Vector3 currentVelocity =
+            new Vector3(
+                rb.velocity.x,
+                0f,
+                rb.velocity.z
+            );
+
+        float control =
+            isGrounded
+            ? 1f
+            : airControl;
+
+        Vector3 smoothedVelocity =
+            Vector3.Lerp(
+                currentVelocity,
+                targetVelocity,
+                acceleration *
+                control *
+                Time.fixedDeltaTime
+            );
+
+        rb.velocity = new Vector3(
+            smoothedVelocity.x,
+            rb.velocity.y,
+            smoothedVelocity.z
+        );
+
+        RotateCharacter();
+    }
+
+    void RotateCharacter()
+    {
+        if (moveDirection.sqrMagnitude < 0.01f)
+            return;
+
+        Quaternion targetRotation =
+            Quaternion.LookRotation(moveDirection);
+
+        rb.rotation = Quaternion.Slerp(
+            rb.rotation,
+            targetRotation,
+            rotationSpeed * Time.fixedDeltaTime
+        );
+    }
+
+    void HandleJumpInput()
+    {
+        if (isGrounded)
+        {
+            canDoubleJump = true;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (isGrounded)
             {
-                isCharging = false;
+                Jump(jumpForce);
+
+                isCharging = true;
+                chargeTimer = 0f;
             }
-            else
+            else if (canDoubleJump)
             {
-                if (Input.GetButton("Jump") || Input.GetKey(KeyCode.UpArrow))
-                {
-                    chargeTimer += Time.deltaTime;
-                    chargeTimer = Mathf.Clamp(chargeTimer, 0f, maxChargeTime);
-                }
-
-                if (Input.GetButtonUp("Jump") || Input.GetKeyUp(KeyCode.UpArrow))
-                {
-                    PerformChargedJump();
-                    isCharging = false;
-                }
+                DoubleJump();
             }
         }
 
-        if (!grounded && jumpCount == 1 && doubleJumpAvailable && rb.velocity.y < 0f &&
-            (Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.UpArrow)))
+        if (Input.GetKey(KeyCode.Space) && isCharging)
         {
-            PerformDoubleJump();
+            chargeTimer += Time.deltaTime;
+
+            chargeTimer = Mathf.Clamp(
+                chargeTimer,
+                0f,
+                maxChargeTime
+            );
+
+            float percent =
+                chargeTimer / maxChargeTime;
+
+            float extraForce =
+                Mathf.Lerp(
+                    0f,
+                    chargedJumpForce - jumpForce,
+                    percent
+                );
+
+            rb.velocity = new Vector3(
+                rb.velocity.x,
+                jumpForce + extraForce,
+                rb.velocity.z
+            );
         }
 
-        wasGroundedLastFrame = grounded;
-    }
-
-    private void PerformChargedJump()
-    {
-        float percent = chargeTimer / maxChargeTime;
-        float jumpHeight = Mathf.Lerp(jumpHeightMin, jumpHeightMax, percent);
-        float jumpVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
-
-        rb.velocity = new Vector3(rb.velocity.x, jumpVelocity, rb.velocity.z);
-        jumpCount = 1;
-    }
-
-    private void PerformDoubleJump()
-    {
-        float newY = doubleJumpBoost;
-        rb.velocity = new Vector3(rb.velocity.x, jumpHeightMin + newY, rb.velocity.z);
-
-        jumpCount = 2;
-        doubleJumpAvailable = false;
-        energyTimer = 0f;
-    }
-
-    private void UpdateDoubleJumpEnergy()
-    {
-        if (doubleJumpAvailable) return;
-
-        energyTimer += Time.deltaTime;
-
-        if (energyTimer >= doubleJumpCooldown)
+        if (Input.GetKeyUp(KeyCode.Space))
         {
-            doubleJumpAvailable = true;
-            energyTimer = 0f;
+            isCharging = false;
+        }
+    }
+    void Jump(float force)
+    {
+        rb.velocity = new Vector3(
+            rb.velocity.x,
+            0f,
+            rb.velocity.z
+        );
+
+        rb.AddForce(
+            Vector3.up * force,
+            ForceMode.Impulse
+        );
+
+        isGrounded = false;
+
+        if (animator)
+        {
+            animator.SetTrigger("Jump");
+        }
+    }
+    void DoubleJump()
+    {
+        rb.velocity = new Vector3(
+            rb.velocity.x,
+            0f,
+            rb.velocity.z
+        );
+
+        rb.AddForce(
+            Vector3.up * doubleJumpForce,
+            ForceMode.Impulse
+        );
+
+        canDoubleJump = false;
+
+        if (animator)
+        {
+            animator.SetTrigger("DoubleJump");
         }
     }
 
-    public void RechargeDoubleJump()
+    void HandleDashInput()
     {
-        doubleJumpAvailable = true;
-        energyTimer = 0f;
+        if (
+            Input.GetKeyDown(KeyCode.G) &&
+            canDash &&
+            !isDashing &&
+            !isBlocking
+        )
+        {
+            StartCoroutine(DashRoutine());
+        }
     }
 
-    private void ApplyBetterGravity()
+    IEnumerator DashRoutine()
+    {
+        canDash = false;
+        isDashing = true;
+
+        if (animator)
+        {
+            animator.SetTrigger("Dash");
+        }
+
+        Vector3 dashDirection =
+            moveDirection.sqrMagnitude > 0.01f
+            ? moveDirection
+            : transform.forward;
+
+        rb.velocity = new Vector3(
+            0f,
+            rb.velocity.y,
+            0f
+        );
+
+        rb.AddForce(
+            dashDirection * dashForce,
+            ForceMode.Impulse
+        );
+
+        yield return new WaitForSeconds(dashDuration);
+
+        isDashing = false;
+
+        yield return new WaitForSeconds(dashCooldown);
+
+        canDash = true;
+    }
+
+    void HandleBlockInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            isBlocking = true;
+
+            rb.velocity = Vector3.zero;
+
+            if (animator)
+            {
+                animator.SetBool("Blocking", true);
+            }
+        }
+
+        if (Input.GetKeyUp(KeyCode.Q))
+        {
+            isBlocking = false;
+
+            if (animator)
+            {
+                animator.SetBool("Blocking", false);
+            }
+        }
+    }
+
+    void ApplyBetterGravity()
     {
         if (rb.velocity.y < 0)
-            rb.velocity += Vector3.up * gravity * (fallMultiplier - 1) * Time.fixedDeltaTime;
-        else if (rb.velocity.y > 0 && !(Input.GetButton("Jump") || Input.GetKey(KeyCode.UpArrow)))
-            rb.velocity += Vector3.up * gravity * (lowJumpMultiplier - 1) * Time.fixedDeltaTime;
-    }
-
-    private void HandleMovement()
-    {
-        CalculateMoveDirection();
-        RotateCharacter();
-        MoveCharacter();
-    }
-
-    private void CalculateMoveDirection()
-    {
-        if (!cameraTransform)
-            moveDirection = new Vector3(moveX, 0, moveZ).normalized;
-        else
         {
-            Vector3 forward = cameraTransform.forward;
-            Vector3 right = cameraTransform.right;
-            forward.y = 0;
-            right.y = 0;
-            forward.Normalize();
-            right.Normalize();
-            moveDirection = (forward * moveZ + right * moveX).normalized;
+            rb.velocity +=
+                Vector3.up *
+                Physics.gravity.y *
+                (fallMultiplier - 1f) *
+                Time.fixedDeltaTime;
+        }
+        else if (
+            rb.velocity.y > 0 &&
+            !Input.GetKey(KeyCode.Space)
+        )
+        {
+            rb.velocity +=
+                Vector3.up *
+                Physics.gravity.y *
+                (gravityMultiplier - 1f) *
+                Time.fixedDeltaTime;
         }
     }
-
-    private void RotateCharacter()
+    void CheckGround()
     {
-        if (moveDirection.sqrMagnitude > 0.01f && currentMode == MovementMode.ThreeD)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
-            rb.rotation = Quaternion.Slerp(rb.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
-        }
+        isGrounded = Physics.Raycast(
+            transform.position + Vector3.up * 0.2f,
+            Vector3.down,
+            groundDistance,
+            groundMask
+        );
     }
 
-    private void MoveCharacter()
+    public void ApplySpeedBoost(
+        float amount,
+        float duration
+    )
     {
-        float speed = IsRunning ? runSpeed : walkSpeed;
-        float control = IsGrounded ? 1f : airControlPercent;
-
-        Vector3 desiredVelocity = moveDirection * speed * control;
-
-        if (currentMode == MovementMode.TwoD)
-            rb.velocity = new Vector3(desiredVelocity.x, rb.velocity.y, 0f);
-        else
-            rb.velocity = new Vector3(desiredVelocity.x, rb.velocity.y, desiredVelocity.z);
+        StartCoroutine(
+            SpeedBoostRoutine(amount, duration)
+        );
     }
 
-    public void ApplySpeedBoost(float amount, float duration)
-    {
-        StartCoroutine(SpeedBoostRoutine(amount, duration));
-    }
-
-    private System.Collections.IEnumerator SpeedBoostRoutine(float amount, float duration)
+    IEnumerator SpeedBoostRoutine(
+        float amount,
+        float duration
+    )
     {
         walkSpeed += amount;
-        runSpeed += amount;
+        sprintSpeed += amount;
 
         yield return new WaitForSeconds(duration);
 
         walkSpeed -= amount;
-        runSpeed -= amount;
+        sprintSpeed -= amount;
     }
 
-    public void ApplyJumpBoost(float amount, float duration)
+    public void ApplyJumpBoost(
+        float amount,
+        float duration
+    )
     {
-        StartCoroutine(JumpBoostRoutine(amount, duration));
+        StartCoroutine(
+            JumpBoostRoutine(amount, duration)
+        );
     }
 
-    private System.Collections.IEnumerator JumpBoostRoutine(float amount, float duration)
+    IEnumerator JumpBoostRoutine(
+        float amount,
+        float duration
+    )
     {
-        jumpHeightMax += amount;
+        jumpForce += amount;
+        chargedJumpForce += amount;
+        doubleJumpForce += amount;
 
         yield return new WaitForSeconds(duration);
 
-        jumpHeightMax -= amount;
+        jumpForce -= amount;
+        chargedJumpForce -= amount;
+        doubleJumpForce -= amount;
     }
 
-    private void UpdateChargeUI()
+    public void RechargeDoubleJump()
     {
-        if (!chargeBarFill) return;
-        chargeBarFill.fillAmount = isCharging ? chargeTimer / maxChargeTime : 0f;
+        canDoubleJump = true;
+    }
+
+    void UpdateAnimations()
+    {
+        if (!animator)
+            return;
+
+        Vector3 horizontalVelocity =
+            new Vector3(
+                rb.velocity.x,
+                0f,
+                rb.velocity.z
+            );
+
+        animator.SetFloat(
+            "Speed",
+            horizontalVelocity.magnitude
+        );
+
+        animator.SetBool(
+            "Grounded",
+            isGrounded
+        );
+
+        animator.SetFloat(
+            "VerticalSpeed",
+            rb.velocity.y
+        );
+    }
+
+    void UpdateChargeUI()
+    {
+        if (!chargeBarFill)
+            return;
+
+        if (isCharging)
+        {
+            chargeBarFill.fillAmount =
+                chargeTimer / maxChargeTime;
+        }
+        else
+        {
+            chargeBarFill.fillAmount = 0f;
+        }
     }
 }
