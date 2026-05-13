@@ -48590,10 +48590,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e5f733c96c316c4a9ea3dadc4b70bb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SpriteSprite: 1
+  billboard: 1
   flipSprite: 1
-  target: {fileID: 1832759205}
-  targetRigidbody: {fileID: 1832759208}
+  targetRb: {fileID: 0}
+  animator: {fileID: 0}
+  spriteRenderer: {fileID: 0}
+  cameraFollow: {fileID: 0}
+  backSprites:
+  - {fileID: -1937316035, guid: 37696203886169e4f8245f1b547a1c53, type: 3}
+  frontSprites:
+  - {fileID: 287913297, guid: 37696203886169e4f8245f1b547a1c53, type: 3}
 --- !u!212 &1399086185
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -48640,7 +48646,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.29, y: 0.49}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -48868,12 +48874,6 @@ CharacterController:
 --- !u!4 &1832759205 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6129578367967161269, guid: e3fe52d757dbacb43a943a5d311369b8,
-    type: 3}
-  m_PrefabInstance: {fileID: 1832759198}
-  m_PrefabAsset: {fileID: 0}
---- !u!54 &1832759208 stripped
-Rigidbody:
-  m_CorrespondingSourceObject: {fileID: 1027559884138143172, guid: e3fe52d757dbacb43a943a5d311369b8,
     type: 3}
   m_PrefabInstance: {fileID: 1832759198}
   m_PrefabAsset: {fileID: 0}
