@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Manicomio.Assets.Scripts.States;
-// using Unity.VisualScripting;
+using Unity.VisualScripting;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
@@ -38,7 +38,7 @@ public class StateManager
     // why update constantly? Depends on the script no? Wouldn't "on input" be better? Ask later lmao
     public void Update()
     {
-        // constantly execute them?
+        // constantly execute them
         currentState?.Execute();
     }
 }
