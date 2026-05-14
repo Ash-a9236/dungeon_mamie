@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3847234767929051714}
   - component: {fileID: 4289735972815409118}
+  - component: {fileID: 1947880387991541931}
   m_Layer: 0
   m_Name: Game_Manager
   m_TagString: Untagged
@@ -44,6 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37e9559cdc8f70f49b93c1b550c8c417, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  audioSource: {fileID: 0}
   score: 0
   timeElapsed: 0
   timerRunning: 1
@@ -51,3 +53,15 @@ MonoBehaviour:
   timerText: {fileID: 0}
   end: {fileID: 0}
   checkInterval: 0.5
+--- !u!114 &1947880387991541931
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1300555572536568004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28232d16cc956ec428f231da0f5416f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
