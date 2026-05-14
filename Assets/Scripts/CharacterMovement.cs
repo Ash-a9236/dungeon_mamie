@@ -163,7 +163,7 @@ public class CharacterMovement : MonoBehaviour
 
     void HandleDash()
     {
-        if (Input.GetKeyDown(KeyCode.G) && canDash && !isDashing)
+        if (Input.GetKeyDown(KeyCode.V) && canDash && !isDashing)
         {
             StartCoroutine(DashRoutine());
         }
