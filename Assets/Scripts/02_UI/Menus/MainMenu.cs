@@ -6,7 +6,7 @@ public class MainMenu : MonoBehaviour {
     public GameObject settingsPanel;
 
     public void PlayGame() {
-        SceneManager.LoadScene("Level1Scene");
+        SceneManager.LoadScene("TileTestScene");
     }
 
     public void OpenSettings() {

@@ -15,7 +15,7 @@ public class InventoryToggle : MonoBehaviour
     void Update()
     {
         // When I is pressed
-        if (Input.GetKeyDown(KeyCode.I))
+        if (Input.GetKeyDown(KeyCode.M))
         {
             ToggleInventory();
         }

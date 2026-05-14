@@ -106,15 +106,18 @@ public class MenuController : MonoBehaviour
         catch (System.Exception e) { Debug.LogError("OnPausePressed error: " + e.Message); }
     }
 
-    private void OnPlayPressed()
+   private void OnPlayPressed()
+{
+    try
     {
-        try
-        {
-            Time.timeScale = 1f;
-            SceneManager.LoadScene("LevelSelectScene");
-        }
-        catch (System.Exception e) { Debug.LogError("OnPlayPressed error: " + e.Message); }
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("TileTestScene");
     }
+    catch (System.Exception e)
+    {
+        Debug.LogError("OnPlayPressed error: " + e.Message);
+    }
+}
 
     private void OnQuitPressed()
     {
