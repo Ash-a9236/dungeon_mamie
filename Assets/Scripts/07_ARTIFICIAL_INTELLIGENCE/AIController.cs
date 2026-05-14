@@ -6,7 +6,6 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
-[RequireComponent(typeof(Renderer))]
 public class AIController : MonoBehaviour
 {
     public NavMeshAgent Agent { get; private set; }
@@ -31,6 +30,7 @@ public class AIController : MonoBehaviour
         stateManager.AddState(new ChaseState(this));
         stateManager.AddState(new AttackState(this));
         stateManager.AddState(new PatrolState(this));
+        stateManager.AddState(new IdleState(this));
 
         stateManager.ChangeState(StateType.IDLE);
     }
