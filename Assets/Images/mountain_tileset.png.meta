@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 22df03cb5967e4c4a87dd2d6bf69efcd
+guid: 03eb444182d58e244a6f7a7e96f6bdc1
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -43,7 +43,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -95,18 +95,84 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: mountain_tileset_0
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 303
+        width: 133
+        height: 176
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dc013008be7e8ae46b2a46f02094185b
+      internalID: 1460628670
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mountain_tileset_1
+      rect:
+        serializedVersion: 2
+        x: 58
+        y: 216
+        width: 138
+        height: 76
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 26a32dab9ca48dc42933c3cd766fe627
+      internalID: -1097598682
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mountain_tileset_2
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 215
+        width: 55
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 51b79e0cd8434744789ba5ba3527864a
+      internalID: 175685948
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: f1510dc74913d734a88e7f483979baf8
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      mountain_tileset_0: 1460628670
+      mountain_tileset_1: -1097598682
+      mountain_tileset_2: 175685948
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
