@@ -50,21 +50,29 @@ public class AIController : MonoBehaviour
         // Step 1 — Distance
         if (toPlayer.magnitude > viewDistance)
             return false;
+        Debug.Log("phase 1");
 
         // Step 2 — Angle (dot product)
         float dot = Vector3.Dot(transform.forward, toPlayer.normalized);
 
-        float threshold = Mathf.Cos(360 * Mathf.Deg2Rad);
+        float threshold = Mathf.Cos(180 * Mathf.Deg2Rad);
 
         if (dot < threshold)
             return false;
 
-        // Step 3 — Line of sight (raycast)
-        if (Physics.Raycast(transform.position, toPlayer.normalized,
-                            toPlayer.magnitude, obstacleMask))
-            return false;
+        Debug.Log("phase 2");
 
+        Debug.DrawRay(transform.position, toPlayer.normalized * toPlayer.magnitude, Color.red);
         LastKnownPlayerPosition = Player.position;
+
+        // Step 3 — Line of sight (raycast)
+        if (Physics.Raycast(transform.position, toPlayer.normalized, toPlayer.magnitude, obstacleMask))
+        {
+            return false;
+        }
+
+
+
 
         Debug.Log("I see things and they are telling me to reach for the officer's gun!");
 
