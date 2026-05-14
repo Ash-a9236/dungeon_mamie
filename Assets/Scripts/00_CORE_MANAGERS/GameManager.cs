@@ -5,11 +5,17 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
+    public AudioSource audioSource;
+
     public int score;
     public float timeElapsed;
     public bool timerRunning = true;
     public Text scoreText;
     public Text timerText;
+
+    public GameObject end;
+    public float checkInterval = 0.5f;
+
     private void Awake()
     {
         if (Instance == null)
@@ -21,6 +27,16 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    private void Start()
+    {
+        if (end != null)
+        {
+            end.SetActive(false);
+        }
+
+        InvokeRepeating("CheckForEnemies", 1f, checkInterval);
     }
 
     private void Update()
@@ -71,5 +87,27 @@ public class GameManager : MonoBehaviour
     {
         score = 0;
         UpdateScoreUI();
+    }
+
+    void CheckForEnemies()
+    {
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+
+        if (enemies.Length == 0)
+        {
+            audioSource.Play();
+            ActivateGoal();
+        }
+    }
+
+    void ActivateGoal()
+    {
+        if (end != null && !end.activeSelf)
+        {
+            end.SetActive(true);
+            Debug.Log("All enemies defeated! Goal is active.");
+            
+            CancelInvoke("CheckForEnemies");
+        }
     }
 }
