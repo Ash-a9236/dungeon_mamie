@@ -6,16 +6,18 @@ public class InventoryToggle : MonoBehaviour
 
     private bool isOpen = false;
 
-    void Start()
-    {
-        // Start closed
-        inventoryUI.SetActive(false);
-    }
+   void Start()
+{
+    inventoryUI.SetActive(false);
+
+    Cursor.lockState = CursorLockMode.Locked;
+    Cursor.visible = false;
+}
 
     void Update()
     {
         // When I is pressed
-        if (Input.GetKeyDown(KeyCode.I))
+        if (Input.GetKeyDown(KeyCode.M))
         {
             ToggleInventory();
         }
@@ -37,7 +39,7 @@ public class InventoryToggle : MonoBehaviour
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
-            Time.timeScale = 1f; // resume game
+             Time.timeScale = 1f; // resume game
         }
     }
 }
