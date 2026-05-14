@@ -63,7 +63,6 @@ public class AIController : MonoBehaviour
         Debug.Log("phase 2");
 
         Debug.DrawRay(transform.position, toPlayer.normalized * toPlayer.magnitude, Color.red);
-        LastKnownPlayerPosition = Player.position;
 
         // Step 3 — Line of sight (raycast)
         if (Physics.Raycast(transform.position, toPlayer.normalized, toPlayer.magnitude, obstacleMask))
@@ -71,8 +70,7 @@ public class AIController : MonoBehaviour
             return false;
         }
 
-
-
+        LastKnownPlayerPosition = Player.position;
 
         Debug.Log("I see things and they are telling me to reach for the officer's gun!");
 
@@ -85,7 +83,10 @@ public class AIController : MonoBehaviour
         return distanceToPlayer <= AttackRange;
     }
 
-
+    public void DealDamage()
+    {
+        Player.parent.GetComponent<EntityManager>().TakeDamage(10);
+    }
 
     private void OnDrawGizmosSelected()
     {

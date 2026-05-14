@@ -42,6 +42,6 @@ public class ChaseState : BaseState
 
     public void Exit()
     {
-
+        aiController.Agent.ResetPath();
     }
 }
