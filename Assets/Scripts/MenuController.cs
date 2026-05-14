@@ -111,7 +111,7 @@ public class MenuController : MonoBehaviour
         try
         {
             Time.timeScale = 1f;
-            SceneManager.LoadScene("LevelSelectScene");
+            SceneManager.LoadScene("TileTestScene");
         }
         catch (System.Exception e) { Debug.LogError("OnPlayPressed error: " + e.Message); }
     }

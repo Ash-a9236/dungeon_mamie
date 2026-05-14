@@ -38,4 +38,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Dungeon/DungeonTestScene.unity
     guid: 21818beb9a9302046b4771f7e98256f3
+  - enabled: 1
+    path: Assets/Scenes/Dungeon/DemoEnd.unity
+    guid: d91a05a08bbf6784fadad72704fc244e
+  - enabled: 1
+    path: Assets/Scenes/TileTestScene.unity
+    guid: 3e4aa518332158f4b8fd30bf6d0453c6
   m_configObjects: {}
