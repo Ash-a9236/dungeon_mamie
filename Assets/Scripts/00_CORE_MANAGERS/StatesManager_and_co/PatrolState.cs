@@ -27,7 +27,7 @@ public class PatrolState : BaseState
             {
                 aiController.Agent.ResetPath();
             }
-
+            Debug.Log("I see things and they are telling me to reach for the officer's gun!");
             aiController.stateManager.ChangeState(StateType.CHASING);
 
             return;
@@ -52,7 +52,7 @@ public class PatrolState : BaseState
     {
         Vector3 randomPoint = new Vector3(Random.Range(-10, 10), 0, Random.Range(-10, 10));
         aiController.Agent.SetDestination(randomPoint + aiController.transform.position);
-
+        Debug.Log("Moving to random point: " + randomPoint);
         yield return new WaitForSeconds(2f);
     }
 }
