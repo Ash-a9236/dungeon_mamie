@@ -14,7 +14,7 @@ public class SkillFaceCamera : MonoBehaviour
         // point.z = 0;
 
         // transform.up = point;
-        
+
     }
 
     public static void rotateSkill(Transform skill, Transform player)
@@ -24,11 +24,5 @@ public class SkillFaceCamera : MonoBehaviour
         float angle = Mathf.Atan2(positionBetween.x, positionBetween.z) * Mathf.Rad2Deg;
 
         skill.transform.eulerAngles = new Vector3(90f, angle * -1, 0f);
-
-        // float angle = Mathf.Atan2(player.position.y - skill.transform.position.y, player.position.z - skill.transform.position.x) * Mathf.Rad2Deg;
-
-        // Quaternion rotation = Quaternion.Euler(new Vector3(90f, angle, 0f));
-
-        // skill.transform.rotation = rotation;
     }
 }

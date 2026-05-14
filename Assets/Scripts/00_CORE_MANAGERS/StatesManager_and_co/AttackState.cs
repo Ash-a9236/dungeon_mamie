@@ -24,6 +24,12 @@ public class AttackState : BaseState
 
     public void Execute()
     {
+        if (!aiController.CanSeePlayer())
+        {
+            aiController.stateManager.ChangeState(StateType.PATROL);
+            return;
+        }
+
         if (!aiController.CanAttack())
         {
             aiController.stateManager.ChangeState(StateType.CHASING);
@@ -32,6 +38,7 @@ public class AttackState : BaseState
 
         if (Time.deltaTime - lastAttackTime >= attackCooldown)
         {
+            aiController.DealDamage();
             lastAttackTime = Time.deltaTime;
             // aiController.animationController.SetTrigger("Attack");
         }
