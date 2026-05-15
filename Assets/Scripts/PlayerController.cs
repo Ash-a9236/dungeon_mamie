@@ -13,7 +13,8 @@ public class PlayerController : MonoBehaviour
 {
     // TODO: ORGANIZE THE HIERARCHY
     [Header("Components")] 
-    [SerializeField] private Transform transform;
+   // [SerializeField] private Transform transform;
+   public Transform transform;
     [SerializeField] private Rigidbody rb;
     public Collider hitbox;
 

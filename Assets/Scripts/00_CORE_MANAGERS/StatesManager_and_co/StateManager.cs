@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Manicomio.Assets.Scripts.States;
 using Unity.VisualScripting;
+#if UNITY_EDITOR
 using UnityEditor.IMGUI.Controls;
+#endif
 using UnityEngine;
 
 public class StateManager
